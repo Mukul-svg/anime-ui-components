@@ -1,18 +1,25 @@
 @import "tailwindcss";
 
 @theme {
-  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque", "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+:root {
+  --sk-font: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --sk-font-display: "Bricolage Grotesque", "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --sk-font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 }
 
 @layer base {
   html {
     scroll-behavior: smooth;
     overflow-x: clip;
-    background-color: #ffffff;
+    background-color: #f6f6fb;
     color: #1d1a4a;
     font-family: var(--font-sans);
+    font-synthesis-style: none;
   }
 
   body {
@@ -24,6 +31,7 @@
   h2,
   h3 {
     font-family: var(--font-display);
+    font-style: normal;
     text-wrap: balance;
   }
 

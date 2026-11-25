@@ -1051,6 +1051,7 @@
         color: var(--sk-ink);
         box-shadow: var(--sk-sh);
         text-align: center;
+        font-family: var(--sk-font-display, inherit);
         font-weight: 800;
         font-size: 20px;
         font-variant-numeric: tabular-nums;
@@ -1344,6 +1345,7 @@
         background: var(--sk-card);
         color: var(--sk-ink);
         box-shadow: var(--sk-sh);
+        font-family: var(--sk-font-display, inherit);
         font-weight: 800;
         font-size: 20px;
         font-variant-numeric: tabular-nums;
@@ -1393,6 +1395,11 @@
 
     syncUI() {
       this.readout.textContent = String(this._val).padStart(3, '0');
+    }
+
+    setValue(next) {
+      this._val = Math.max(0, parseInt(String(next), 10) || 0);
+      this.syncUI();
     }
 
     bump(delta) {
@@ -1523,12 +1530,22 @@
       this.b.setAttribute('aria-label', `${this.labelText} (${this._unread} unread)`);
     }
 
+    setCount(next, ping = false) {
+      this._unread = Math.max(0, parseInt(String(next), 10) || 0);
+      this.syncUI();
+      if (ping && this._unread > 0) {
+        this.ringSp.v = 620;
+        this.badgeSp.x = 0.35;
+      }
+    }
+
     setup() {
       this.b = this.$('button');
       this.bellEl = this.$('.bell');
       this.badge = this.$('.badge');
       this.labelText = this.getAttribute('label') || 'Notifications';
-      this._unread = Math.max(0, parseInt(this.getAttribute('count') || '3', 10) || 0);
+      this.manualMode = this.hasAttribute('manual');
+      this._unread = Math.max(0, parseInt(this.getAttribute('count') || (this.manualMode ? '0' : '3'), 10) || 0);
       this.press = squashy(this.b, { low: 0.82, wide: 0.34 });
       this.ringSp = new Spring(0, 620, 8);
       this.badgeSp = new Spring(1, 520, 12);
@@ -1546,6 +1563,10 @@
           kira(c.x + 24, c.y - 26, { r: 10, life: 0.56, col: fx.P.accent });
           sfx('kachi', c.x + 28, c.y - 48, { size: 64, rot: 0.1, life: 0.72, ...getHollow() });
           this.emit('change', { unread: 0, action: 'cleared' });
+        } else if (this.manualMode) {
+          wob(c.x - 28, c.y - 6, { dir: -1, r: 12, life: 0.36 });
+          wob(c.x + 28, c.y - 6, { dir: 1, r: 12, life: 0.36 });
+          this.emit('change', { unread: 0, action: 'open' });
         } else {
           this._unread = 3;
           this.syncUI();
@@ -2202,6 +2223,7 @@
       .dial.urgent .fg { stroke: var(--sk-acc); }
       .sec {
         position: relative;
+        font-family: var(--sk-font-display, inherit);
         font-weight: 800;
         font-size: 16px;
         color: var(--sk-ink);
@@ -2229,8 +2251,21 @@
       }
     `;
 
+    formatTime(sec) {
+      const whole = Math.max(0, Math.ceil(sec));
+      if (this.total >= 60 || whole >= 60) {
+        const mins = Math.floor(whole / 60);
+        const rem = whole % 60;
+        return `${String(mins).padStart(2, '0')}:${String(rem).padStart(2, '0')}`;
+      }
+      return `${String(whole).padStart(2, '0')}s`;
+    }
+
     render() {
-      const secs = clamp(parseInt(this.getAttribute('seconds') || '5', 10) || 5, 3, 60);
+      const secs = clamp(parseInt(this.getAttribute('seconds') || '5', 10) || 5, 3, 3600);
+      const initial = secs >= 60
+        ? `${String(Math.floor(secs / 60)).padStart(2, '0')}:${String(secs % 60).padStart(2, '0')}`
+        : `${String(secs).padStart(2, '0')}s`;
       return `
         <div class="wrap" role="group" aria-label="Countdown timer">
           <button type="button" class="dial" aria-label="Start or pause countdown">
@@ -2238,7 +2273,7 @@
               <circle class="bg" cx="22" cy="22" r="18" />
               <circle class="fg" cx="22" cy="22" r="18" stroke-dasharray="113.1" stroke-dashoffset="0" />
             </svg>
-            <span class="sec">${String(secs).padStart(2, '0')}s</span>
+            <span class="sec">${initial}</span>
           </button>
           <div class="ctrl">
             <button type="button" class="btn go">Start</button>
@@ -2249,12 +2284,22 @@
     }
 
     syncUI() {
-      const shown = Math.ceil(this._rem);
-      this.secEl.textContent = `${String(shown).padStart(2, '0')}s`;
+      const text = this.formatTime(this._rem);
+      this.secEl.textContent = text;
+      this.secEl.style.fontSize = text.length > 3 ? '12.5px' : '16px';
       const ratio = clamp(this._rem / this.total, 0, 1);
       this.fg.setAttribute('stroke-dashoffset', (113.1 * (1 - ratio)).toFixed(2));
-      this.dial.classList.toggle('urgent', this._running && this._rem <= 2);
+      this.dial.classList.toggle('urgent', this._running && this._rem <= Math.min(10, Math.max(2, this.total * 0.15)));
       this.goBtn.textContent = this._running ? 'Pause' : this._rem <= 0 ? 'Replay' : 'Start';
+    }
+
+    setDuration(sec) {
+      this._running = false;
+      this.total = clamp(parseInt(String(sec), 10) || 5, 3, 3600);
+      this._rem = this.total;
+      this._lastWhole = this.total;
+      this.syncUI();
+      this.emit('state', { running: false, remaining: this.total });
     }
 
     toggle() {
@@ -2282,7 +2327,7 @@
       this.secEl = this.$('.sec');
       this.goBtn = this.$('.go');
       this.rstBtn = this.$('.rst');
-      this.total = clamp(parseInt(this.getAttribute('seconds') || '5', 10) || 5, 3, 60);
+      this.total = clamp(parseInt(this.getAttribute('seconds') || '5', 10) || 5, 3, 3600);
       this._rem = this.total;
       this._lastWhole = this.total;
       this._running = false;
@@ -2514,4 +2559,832 @@
     }
   }
   fx.define('sakuga-split-button', SakugaSplitButton);
+
+  // Shared vector icons for <sakuga-action-button> and <sakuga-icon-button>
+  const STUDIO_ICONS = {
+    play: '<svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>',
+    pause: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1" fill="currentColor"/><rect x="14" y="4" width="4" height="16" rx="1" fill="currentColor"/></svg>',
+    step: '<svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="5 5 15 12 5 19 5 5" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>',
+    trash: '<svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>',
+    lock: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
+    plus: '<svg viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+    close: '<svg viewBox="0 0 24 24" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>',
+    refresh: '<svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>',
+    sparkles: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>',
+    book: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4h7a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2z"/><path d="M22 4h-7a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h8z"/></svg>',
+  };
+
+  // 19. <sakuga-action-button> — Compact cel-shaded icon+label button with speed lines, kira sparkle & シュッ
+  class SakugaActionButton extends fx.Base {
+    static delegates = true;
+    static observedAttributes = ['variant', 'icon', 'size', 'disabled', 'label'];
+    static css = `
+      :host { display: inline-block; }
+      button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        height: 40px;
+        padding: 0 15px;
+        border: var(--sk-bw) solid var(--sk-ink);
+        border-radius: 12px;
+        background: var(--sk-card);
+        color: var(--sk-ink);
+        font-weight: 700;
+        font-size: 13.5px;
+        line-height: 1;
+        letter-spacing: -0.01em;
+        white-space: nowrap;
+        box-shadow: 4px 5px 0 var(--sk-soft);
+        cursor: pointer;
+        user-select: none;
+        will-change: transform;
+        transition: background 120ms ease, color 120ms ease, filter 120ms ease;
+      }
+      button.sm {
+        height: 34px;
+        padding: 0 12px;
+        font-size: 12.5px;
+        border-radius: 10px;
+        box-shadow: 3px 4px 0 var(--sk-soft);
+      }
+      button.md {
+        height: 44px;
+        padding: 0 18px;
+        font-size: 14px;
+        border-radius: 13px;
+        box-shadow: 5px 6px 0 var(--sk-soft);
+      }
+      button.primary {
+        background: var(--sk-pri);
+        color: var(--sk-on-pri);
+      }
+      button.accent {
+        background: var(--sk-acc);
+        color: var(--sk-on-pri);
+      }
+      button:hover:not(:disabled) { filter: brightness(1.04); }
+      button:focus-visible {
+        outline: 2.5px solid var(--sk-acc);
+        outline-offset: 3px;
+      }
+      button:disabled { opacity: 0.48; cursor: not-allowed; }
+      .ico {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 15px;
+        height: 15px;
+        flex-shrink: 0;
+        will-change: transform;
+      }
+      .ico.empty { display: none; }
+      .ico svg {
+        width: 100%;
+        height: 100%;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2.4;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        overflow: visible;
+      }
+    `;
+
+    get disabled() {
+      return this.hasAttribute('disabled');
+    }
+    set disabled(v) {
+      this.toggleAttribute('disabled', !!v);
+    }
+
+    render() {
+      const iconName = this.getAttribute('icon') || '';
+      const iconSvg = STUDIO_ICONS[iconName] || '';
+      const variant = this.getAttribute('variant') || 'default';
+      const size = this.getAttribute('size') || '';
+      const ariaLabel = this.getAttribute('label');
+      const cls = [variant !== 'default' ? variant : '', size].filter(Boolean).join(' ');
+      return `
+        <button type="button" class="${esc(cls)}"${ariaLabel ? ` aria-label="${esc(ariaLabel)}"` : ''}${this.disabled ? ' disabled' : ''}>
+          <span class="ico${iconSvg ? '' : ' empty'}" aria-hidden="true">${iconSvg}</span>
+          <span class="txt"><slot>Focus</slot></span>
+        </button>
+      `;
+    }
+
+    syncAttrs() {
+      if (!this.b) return;
+      const variant = this.getAttribute('variant') || 'default';
+      const size = this.getAttribute('size') || '';
+      this.b.className = [variant !== 'default' ? variant : '', size].filter(Boolean).join(' ');
+      this.b.disabled = this.disabled;
+      const ariaLabel = this.getAttribute('label');
+      if (ariaLabel) this.b.setAttribute('aria-label', ariaLabel);
+      else this.b.removeAttribute('aria-label');
+      const iconName = this.getAttribute('icon') || '';
+      const iconSvg = STUDIO_ICONS[iconName] || '';
+      this.ico.innerHTML = iconSvg;
+      this.ico.classList.toggle('empty', !iconSvg);
+    }
+
+    setup() {
+      this.b = this.$('button');
+      this.ico = this.$('.ico');
+      this.press = squashy(this.b, { low: 0.78, wide: 0.34 });
+      this.icoSp = new Spring(1, 560, 12);
+      this.back = null;
+      this.syncAttrs();
+
+      this.b.addEventListener('click', (e) => {
+        if (this.disabled) {
+          e.stopImmediatePropagation();
+          return;
+        }
+        const c = at(this.b);
+        const variant = this.getAttribute('variant') || 'default';
+        this.press.pop.x = 1.14;
+        this.press.tilt.x = variant === 'accent' ? -4 : -2.5;
+        this.icoSp.x = 1.42;
+
+        if (variant === 'accent') {
+          this.back ||= this.backLayer();
+          burst(c.x, c.y, { r: 44, spikes: 12, life: 0.34, layer: this.back });
+          lines(c.x + c.w * 0.45, c.y, { n: 5, dir: 0, len: 34, spread: 16, life: 0.28 });
+          kira(c.x + c.w * 0.36, c.y - 20, { r: 10, life: 0.56, col: fx.P.accent });
+          sfx('shu', c.x + 22, c.y - 44, { size: 64, rot: -0.08, life: 0.72, ...getHollow() });
+        } else if (variant === 'primary') {
+          this.back ||= this.backLayer();
+          burst(c.x, c.y, { r: 42, spikes: 10, life: 0.32, layer: this.back });
+          ticks(c.x, c.y - c.h * 0.4, { dir: -Math.PI / 2, n: 5, r: 14, len: 13, fan: 0.52, life: 0.38 });
+          kira(c.x + c.w * 0.35, c.y - 18, { r: 9, life: 0.52, col: fx.P.accent });
+          sfx('pon', c.x + 22, c.y - 42, { size: 60, rot: 0.06, life: 0.68, ...getHollow() });
+        } else {
+          ticks(c.x + c.w * 0.3, c.y - c.h * 0.35, { dir: -0.95, n: 4, r: 8, len: 13, fan: 0.42, life: 0.38 });
+          puff(c.x - c.w * 0.35, c.y + 8, { size: 6, n: 3, vx: -14, vy: -8, life: 0.36 });
+          sfx('kachi', c.x + 20, c.y - 40, { size: 54, rot: 0.08, life: 0.62, ...getHollow() });
+        }
+      });
+    }
+
+    attributeChangedCallback() {
+      this.syncAttrs();
+    }
+
+    frame(dt) {
+      this.press.step(dt);
+      const s = this.icoSp.step(dt);
+      const still = Math.abs(s - 1) < 0.002 && Math.abs(this.icoSp.v) < 0.02;
+      if (still) {
+        if (this._icoMoving) {
+          this._icoMoving = false;
+          this.ico.style.transform = '';
+        }
+      } else {
+        this._icoMoving = true;
+        this.ico.style.transform = `scale(${Math.max(0.3, s).toFixed(3)})`;
+      }
+    }
+  }
+  fx.define('sakuga-action-button', SakugaActionButton);
+
+  // 20. <sakuga-icon-button> — Square cel-shaded icon button (default / danger) with shatter or crisp カチッ
+  class SakugaIconButton extends fx.Base {
+    static delegates = true;
+    static observedAttributes = ['icon', 'tone', 'size', 'disabled', 'label'];
+    static css = `
+      :host { display: inline-block; }
+      button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        border: var(--sk-bw) solid var(--sk-ink);
+        border-radius: 12px;
+        background: var(--sk-card);
+        color: var(--sk-ink);
+        box-shadow: 4px 5px 0 var(--sk-soft);
+        cursor: pointer;
+        user-select: none;
+        will-change: transform;
+        transition: background 120ms ease, color 120ms ease;
+      }
+      button.sm {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        box-shadow: 3px 4px 0 var(--sk-soft);
+      }
+      button.danger:hover:not(:disabled) {
+        background: var(--sk-acc);
+        color: var(--sk-on-pri);
+      }
+      button:not(.danger):hover:not(:disabled) {
+        background: var(--sk-pri);
+        color: var(--sk-on-pri);
+      }
+      button:focus-visible {
+        outline: 2.5px solid var(--sk-acc);
+        outline-offset: 3px;
+      }
+      button:disabled { opacity: 0.45; cursor: not-allowed; }
+      .ico {
+        display: inline-flex;
+        width: 17px;
+        height: 17px;
+        will-change: transform;
+      }
+      button.sm .ico { width: 15px; height: 15px; }
+      svg {
+        width: 100%;
+        height: 100%;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2.4;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+    `;
+
+    get disabled() {
+      return this.hasAttribute('disabled');
+    }
+    set disabled(v) {
+      this.toggleAttribute('disabled', !!v);
+    }
+
+    render() {
+      const iconName = this.getAttribute('icon') || 'trash';
+      const iconSvg = STUDIO_ICONS[iconName] || STUDIO_ICONS.trash;
+      const tone = this.getAttribute('tone') || 'default';
+      const size = this.getAttribute('size') || '';
+      const label = esc(this.getAttribute('label') || iconName);
+      const cls = [tone === 'danger' ? 'danger' : '', size].filter(Boolean).join(' ');
+      return `
+        <button type="button" class="${esc(cls)}" aria-label="${label}"${this.disabled ? ' disabled' : ''}>
+          <span class="ico" aria-hidden="true">${iconSvg}</span>
+        </button>
+      `;
+    }
+
+    syncAttrs() {
+      if (!this.b) return;
+      const tone = this.getAttribute('tone') || 'default';
+      const size = this.getAttribute('size') || '';
+      this.b.className = [tone === 'danger' ? 'danger' : '', size].filter(Boolean).join(' ');
+      this.b.disabled = this.disabled;
+      const iconName = this.getAttribute('icon') || 'trash';
+      this.b.setAttribute('aria-label', this.getAttribute('label') || iconName);
+      this.ico.innerHTML = STUDIO_ICONS[iconName] || STUDIO_ICONS.trash;
+    }
+
+    setup() {
+      this.b = this.$('button');
+      this.ico = this.$('.ico');
+      this.press = squashy(this.b, { low: 0.76, wide: 0.36 });
+      this.rotSp = new Spring(0, 540, 12);
+      this.syncAttrs();
+
+      this.b.addEventListener('click', (e) => {
+        if (this.disabled) {
+          e.stopImmediatePropagation();
+          return;
+        }
+        const c = at(this.b);
+        const danger = this.getAttribute('tone') === 'danger';
+        this.press.pop.x = 1.16;
+        this.rotSp.x = danger ? -18 : 14;
+        if (danger) {
+          shards(c.x, c.y, { n: 7, speed: 185, size: 5.5, life: 0.56 });
+          puff(c.x, c.y, { size: 7, n: 3, vx: 0, vy: -14, life: 0.42 });
+          sfx('shu', c.x + 18, c.y - 38, { size: 58, rot: -0.1, life: 0.68, ...getHollow() });
+        } else {
+          ticks(c.x, c.y, { dir: -Math.PI / 2, n: 5, r: 20, len: 11, fan: 0.55, life: 0.36 });
+          kira(c.x + 16, c.y - 16, { r: 8, life: 0.48, col: fx.P.accent });
+          sfx('kachi', c.x + 18, c.y - 38, { size: 54, rot: 0.08, life: 0.62, ...getHollow() });
+        }
+      });
+    }
+
+    attributeChangedCallback() {
+      this.syncAttrs();
+    }
+
+    frame(dt) {
+      this.press.step(dt);
+      const r = this.rotSp.step(dt);
+      const still = Math.abs(r) < 0.08 && Math.abs(this.rotSp.v) < 0.2;
+      if (still) {
+        if (this._rotMoving) {
+          this._rotMoving = false;
+          this.ico.style.transform = '';
+        }
+      } else {
+        this._rotMoving = true;
+        this.ico.style.transform = `rotate(${r.toFixed(1)}deg)`;
+      }
+    }
+  }
+  fx.define('sakuga-icon-button', SakugaIconButton);
+
+  // 21. <sakuga-textarea> — Multiline cel-shaded textarea with keystroke dust puffs & focus pop
+  class SakugaTextarea extends fx.Base {
+    static formAssociated = true;
+    static delegates = true;
+    static observedAttributes = ['placeholder', 'rows', 'disabled', 'maxlength', 'label'];
+    static css = `
+      :host { display: block; width: var(--sk-textarea-width, 100%); max-width: 100%; }
+      .wrap {
+        position: relative;
+        will-change: transform;
+      }
+      textarea {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 11px 14px;
+        border: var(--sk-bw) solid var(--sk-ink);
+        border-radius: var(--sk-r);
+        background: var(--sk-card);
+        color: var(--sk-ink);
+        font-family: inherit;
+        font-weight: 500;
+        font-size: 14.5px;
+        line-height: 1.5;
+        box-shadow: var(--sk-sh);
+        resize: vertical;
+        outline: none;
+        transition: border-color 140ms ease, box-shadow 140ms ease;
+      }
+      textarea::placeholder { color: var(--sk-dim); opacity: 0.78; }
+      textarea:focus {
+        border-color: var(--sk-pri);
+        box-shadow: 6px 7px 0 var(--sk-acc);
+      }
+      textarea:disabled { opacity: 0.52; cursor: not-allowed; }
+      .meta {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 6px;
+        font-size: 11.5px;
+        font-weight: 700;
+        color: var(--sk-dim);
+        font-variant-numeric: tabular-nums;
+      }
+      .meta.hide { display: none; }
+    `;
+
+    get value() {
+      return this.ta ? this.ta.value : (this.getAttribute('value') || '');
+    }
+    set value(v) {
+      const next = v == null ? '' : String(v);
+      if (this.ta && this.ta.value !== next) {
+        this.ta.value = next;
+      }
+      this.internals?.setFormValue(next);
+      this.syncCount();
+    }
+
+    focus() {
+      this.ta?.focus();
+    }
+
+    render() {
+      const rows = clamp(parseInt(this.getAttribute('rows') || '3', 10) || 3, 2, 14);
+      const placeholder = esc(this.getAttribute('placeholder') || 'Write notes...');
+      const label = esc(this.getAttribute('label') || 'Notes');
+      const maxLen = this.getAttribute('maxlength');
+      const disabled = this.hasAttribute('disabled') ? ' disabled' : '';
+      return `
+        <div class="wrap">
+          <textarea rows="${rows}" placeholder="${placeholder}" aria-label="${label}"${maxLen ? ` maxlength="${esc(maxLen)}"` : ''}${disabled}></textarea>
+          <div class="meta${maxLen ? '' : ' hide'}" aria-live="polite"></div>
+        </div>
+      `;
+    }
+
+    syncCount() {
+      if (!this.meta || !this.ta) return;
+      const maxLen = this.getAttribute('maxlength');
+      if (!maxLen) {
+        this.meta.classList.add('hide');
+        return;
+      }
+      this.meta.classList.remove('hide');
+      this.meta.textContent = `${this.ta.value.length} / ${maxLen}`;
+    }
+
+    setup() {
+      this.wrap = this.$('.wrap');
+      this.ta = this.$('textarea');
+      this.meta = this.$('.meta');
+      this.popSp = new Spring(1, 520, 16);
+      this._lastPuff = 0;
+
+      const initVal = this.getAttribute('value');
+      if (initVal !== null) this.ta.value = initVal;
+      this.internals?.setFormValue(this.ta.value);
+      this.syncCount();
+
+      this.ta.addEventListener('focus', () => {
+        this.popSp.x = 1.03;
+        const c = at(this.ta, 1, 0);
+        ticks(c.x - 10, c.y + 4, { dir: -0.95, n: 3, r: 6, len: 12, fan: 0.42, life: 0.36 });
+      });
+
+      this.ta.addEventListener('input', () => {
+        this.internals?.setFormValue(this.ta.value);
+        this.syncCount();
+        const now = performance.now();
+        if (now - this._lastPuff > 65) {
+          this._lastPuff = now;
+          const r = this.ta.getBoundingClientRect();
+          const linesCount = this.ta.value.split('\n').length;
+          const approxY = Math.min(r.bottom - 14, r.top + 20 + Math.min(linesCount - 1, 4) * 20);
+          const approxX = Math.min(r.right - 20, r.left + 20 + ((this.ta.selectionStart || 0) % 36) * 7.2);
+          puff(approxX + scrollX, approxY + scrollY, {
+            size: 5.5,
+            n: 2,
+            vx: 10,
+            vy: -14,
+            life: 0.36,
+          });
+        }
+        this.emit('input', { value: this.ta.value });
+      });
+
+      this.ta.addEventListener('change', () => {
+        this.emit('change', { value: this.ta.value });
+      });
+    }
+
+    attributeChangedCallback() {
+      if (!this.ta) return;
+      const rows = this.getAttribute('rows');
+      if (rows) this.ta.rows = clamp(parseInt(rows, 10) || 3, 2, 14);
+      const ph = this.getAttribute('placeholder');
+      if (ph !== null) this.ta.placeholder = ph;
+      const lbl = this.getAttribute('label');
+      if (lbl !== null) this.ta.setAttribute('aria-label', lbl);
+      this.ta.disabled = this.hasAttribute('disabled');
+      const maxLen = this.getAttribute('maxlength');
+      if (maxLen) this.ta.setAttribute('maxlength', maxLen);
+      else this.ta.removeAttribute('maxlength');
+      this.syncCount();
+    }
+
+    frame(dt) {
+      const s = this.popSp.step(dt);
+      const still = Math.abs(s - 1) < 0.001 && Math.abs(this.popSp.v) < 0.02;
+      if (still) {
+        if (this._popMoving) {
+          this._popMoving = false;
+          this.wrap.style.transform = '';
+        }
+      } else {
+        this._popMoving = true;
+        this.wrap.style.transform = `scale(${s.toFixed(4)})`;
+      }
+    }
+  }
+  fx.define('sakuga-textarea', SakugaTextarea);
+
+  // 22. <sakuga-nav> — Clean single-line typographic nav bar with velocity-stretched spring cel underline
+  class SakugaNav extends fx.Base {
+    static fromChildren = true;
+    static observedAttributes = ['value'];
+    static css = `
+      :host { display: inline-block; max-width: 100%; }
+      nav {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 24px;
+        padding-bottom: 6px;
+      }
+      button {
+        position: relative;
+        padding: 4px 2px;
+        border: 0;
+        background: transparent;
+        color: var(--sk-dim);
+        font-family: inherit;
+        font-weight: 600;
+        font-size: 14px;
+        line-height: 1.2;
+        white-space: nowrap;
+        cursor: pointer;
+        user-select: none;
+        transition: color 140ms ease;
+      }
+      button:hover { color: var(--sk-ink); }
+      button[aria-current="page"] { color: var(--sk-ink); font-weight: 700; }
+      button:focus-visible {
+        outline: 2.5px solid var(--sk-acc);
+        outline-offset: 4px;
+        border-radius: 4px;
+      }
+      .bar {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        height: 4px;
+        border-radius: 999px;
+        background: var(--sk-acc);
+        border: 1.5px solid var(--sk-ink);
+        box-sizing: border-box;
+        pointer-events: none;
+        transform-origin: left center;
+        will-change: transform, width;
+      }
+    `;
+
+    get value() {
+      return this.items?.[this.idx]?.value ?? '';
+    }
+    set value(v) {
+      if (!this.items) return;
+      const nextIdx = this.items.findIndex((it) => it.value === v);
+      if (nextIdx >= 0 && nextIdx !== this.idx) {
+        this.selectIndex(nextIdx, false);
+      }
+    }
+
+    render() {
+      this.items = [...this.querySelectorAll('option')].map((o) => ({
+        value: o.getAttribute('value') ?? o.textContent.trim(),
+        label: o.textContent.trim(),
+        selected: o.hasAttribute('selected'),
+      }));
+      if (!this.items.length) {
+        this.items = [
+          { value: 'tasks', label: 'Tasks', selected: true },
+          { value: 'focus', label: 'Focus', selected: false },
+          { value: 'summary', label: 'Summary', selected: false },
+          { value: 'components', label: 'Components', selected: false },
+        ];
+      }
+      const attrVal = this.getAttribute('value');
+      const byAttr = attrVal ? this.items.findIndex((it) => it.value === attrVal) : -1;
+      const bySel = this.items.findIndex((it) => it.selected);
+      this.idx = byAttr >= 0 ? byAttr : Math.max(0, bySel);
+      const label = esc(this.getAttribute('label') || 'Primary navigation');
+      const btns = this.items
+        .map(
+          (it, i) =>
+            `<button type="button" data-i="${i}"${i === this.idx ? ' aria-current="page"' : ''}>${esc(it.label)}</button>`
+        )
+        .join('');
+      return `<nav aria-label="${label}">${btns}<span class="bar" aria-hidden="true"></span></nav>`;
+    }
+
+    measure(index) {
+      const btn = this.btns?.[index];
+      if (!btn) return { x: 0, w: 32 };
+      return { x: btn.offsetLeft, w: Math.max(16, btn.offsetWidth) };
+    }
+
+    selectIndex(i, fireVfx = true) {
+      if (!this.btns || i < 0 || i >= this.btns.length) return;
+      const prev = this.idx;
+      this.idx = i;
+      this.btns.forEach((b, k) => {
+        if (k === i) b.setAttribute('aria-current', 'page');
+        else b.removeAttribute('aria-current');
+      });
+      const m = this.measure(i);
+      this.xSp.to = m.x;
+      this.wSp.to = m.w;
+      if (fireVfx && prev !== i) {
+        const c = at(this.btns[i], 0.5, 1);
+        const dir = i > prev ? 0 : Math.PI;
+        lines(c.x, c.y + 2, { n: 4, dir, len: 24, spread: 8, life: 0.24 });
+        ticks(c.x, c.y + 4, { dir: -Math.PI / 2, n: 3, r: 8, len: 10, fan: 0.45, life: 0.34 });
+        sfx('kachi', c.x + 14, c.y - 34, { size: 46, rot: 0.06, life: 0.52, ...getHollow() });
+      }
+    }
+
+    setup() {
+      this.nav = this.$('nav');
+      this.btns = this.$$('button');
+      this.bar = this.$('.bar');
+      const init = this.measure(this.idx);
+      this.xSp = new Spring(init.x, 520, 24);
+      this.wSp = new Spring(init.w, 520, 24);
+      this.bar.style.transform = `translateX(${init.x}px)`;
+      this.bar.style.width = `${init.w}px`;
+
+      // Re-measure after fonts settle
+      later(120, () => {
+        const m = this.measure(this.idx);
+        this.xSp.x = this.xSp.to = m.x;
+        this.wSp.x = this.wSp.to = m.w;
+        this.bar.style.transform = `translateX(${m.x}px)`;
+        this.bar.style.width = `${m.w}px`;
+      });
+
+      this.btns.forEach((b, i) => {
+        b.addEventListener('click', () => {
+          const item = this.items[i];
+          this.selectIndex(i, true);
+          this.emit('change', { index: i, value: item.value, label: item.label });
+        });
+      });
+
+      this.nav.addEventListener('keydown', (e) => {
+        if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+        e.preventDefault();
+        const next = (this.idx + (e.key === 'ArrowRight' ? 1 : -1) + this.btns.length) % this.btns.length;
+        this.btns[next].focus();
+        const item = this.items[next];
+        this.selectIndex(next, true);
+        this.emit('change', { index: next, value: item.value, label: item.label });
+      });
+    }
+
+    attributeChangedCallback(name, _oldVal, newVal) {
+      if (name === 'value' && newVal && this.items) {
+        const nextIdx = this.items.findIndex((it) => it.value === newVal);
+        if (nextIdx >= 0 && nextIdx !== this.idx) {
+          this.selectIndex(nextIdx, true);
+        }
+      }
+    }
+
+    frame(dt) {
+      const x = this.xSp.step(dt);
+      const w = this.wSp.step(dt);
+      const still =
+        Math.abs(x - this.xSp.to) < 0.05 &&
+        Math.abs(this.xSp.v) < 0.15 &&
+        Math.abs(w - this.wSp.to) < 0.05 &&
+        Math.abs(this.wSp.v) < 0.15;
+      if (still) {
+        if (this._barMoving) {
+          this._barMoving = false;
+          this.bar.style.transform = `translateX(${this.xSp.to.toFixed(2)}px)`;
+          this.bar.style.width = `${Math.max(12, this.wSp.to).toFixed(2)}px`;
+        }
+        return;
+      }
+      this._barMoving = true;
+      const velStretch = clamp(Math.abs(this.xSp.v) * 0.0005, 0, 0.35);
+      this.bar.style.transform = `translateX(${x.toFixed(2)}px) scaleX(${(1 + velStretch).toFixed(3)})`;
+      this.bar.style.width = `${Math.max(12, w).toFixed(2)}px`;
+    }
+  }
+  fx.define('sakuga-nav', SakugaNav);
+
+  // 23. <sakuga-alert> — Cel-shaded impact alert banner with spring pop & optional shard dismiss
+  class SakugaAlert extends fx.Base {
+    static observedAttributes = ['tone', 'title', 'dismissible'];
+    static css = `
+      :host { display: block; max-width: 100%; }
+      .box {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 15px;
+        border: var(--sk-bw) solid var(--sk-ink);
+        border-radius: var(--sk-r);
+        background: var(--sk-card);
+        color: var(--sk-ink);
+        box-shadow: 4px 5px 0 var(--sk-soft);
+        will-change: transform;
+      }
+      .box.danger {
+        box-shadow: 4px 5px 0 var(--sk-acc);
+      }
+      .box.success {
+        box-shadow: 4px 5px 0 var(--sk-pri);
+      }
+      .lead {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        min-width: 0;
+        flex: 1;
+      }
+      .mark {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        flex-shrink: 0;
+        border: 2.4px solid var(--sk-ink);
+        border-radius: 999px;
+        background: var(--sk-pri);
+        color: var(--sk-on-pri);
+        font-weight: 800;
+        font-size: 13px;
+        line-height: 1;
+        margin-top: 1px;
+      }
+      .box.danger .mark { background: var(--sk-acc); }
+      .box.warning .mark { background: var(--sk-soft); color: var(--sk-ink); }
+      .copy {
+        min-width: 0;
+        flex: 1;
+      }
+      .title {
+        font-weight: 800;
+        font-size: 13.5px;
+        color: var(--sk-ink);
+        margin-bottom: 2px;
+      }
+      .title.hide { display: none; }
+      .msg {
+        font-size: 13px;
+        line-height: 1.45;
+        font-weight: 600;
+        color: var(--sk-ink);
+      }
+      .close {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 26px;
+        height: 26px;
+        flex-shrink: 0;
+        border: 2.2px solid var(--sk-ink);
+        border-radius: 8px;
+        background: var(--sk-card);
+        color: var(--sk-ink);
+        font-weight: 800;
+        font-size: 14px;
+        line-height: 1;
+        cursor: pointer;
+      }
+      .close:hover {
+        background: var(--sk-acc);
+        color: var(--sk-on-pri);
+      }
+      .close.hide { display: none; }
+    `;
+
+    render() {
+      const tone = this.getAttribute('tone') || 'info';
+      const title = this.getAttribute('title') || '';
+      const dismissible = this.hasAttribute('dismissible');
+      const glyph = tone === 'danger' ? '!' : tone === 'success' ? '✓' : tone === 'warning' ? '!' : 'i';
+      return `
+        <div class="box ${esc(tone)}" role="alert">
+          <div class="lead">
+            <span class="mark" aria-hidden="true">${glyph}</span>
+            <div class="copy">
+              <div class="title${title ? '' : ' hide'}">${esc(title)}</div>
+              <div class="msg"><slot>Check your input before continuing.</slot></div>
+            </div>
+          </div>
+          <button type="button" class="close${dismissible ? '' : ' hide'}" aria-label="Dismiss alert">×</button>
+        </div>
+      `;
+    }
+
+    setup() {
+      this.box = this.$('.box');
+      this.closeBtn = this.$('.close');
+      this.popSp = new Spring(0.86, 540, 14);
+      this.popSp.to = 1;
+
+      later(30, () => {
+        if (!this.isConnected) return;
+        const c = at(this.box);
+        const tone = this.getAttribute('tone') || 'info';
+        if (tone === 'danger') {
+          ticks(c.x - c.w * 0.42, c.y - 10, { dir: -2.2, n: 4, r: 6, len: 12, fan: 0.45, life: 0.36 });
+        } else {
+          puff(c.x - c.w * 0.4, c.y, { size: 6, n: 2, vx: -12, vy: -8, life: 0.32 });
+        }
+      });
+
+      this.closeBtn.addEventListener('click', () => {
+        const c = at(this.closeBtn);
+        shards(c.x, c.y, { n: 6, speed: 170, size: 5, life: 0.52 });
+        sfx('shu', c.x + 14, c.y - 34, { size: 52, rot: -0.08, life: 0.62, ...getHollow() });
+        this.emit('dismiss', { tone: this.getAttribute('tone') || 'info' });
+      });
+    }
+
+    frame(dt) {
+      const s = this.popSp.step(dt);
+      const still = Math.abs(s - 1) < 0.002 && Math.abs(this.popSp.v) < 0.02;
+      if (still) {
+        if (this._popMoving) {
+          this._popMoving = false;
+          this.box.style.transform = '';
+        }
+      } else {
+        this._popMoving = true;
+        this.box.style.transform = `scale(${s.toFixed(3)})`;
+      }
+    }
+  }
+  fx.define('sakuga-alert', SakugaAlert);
 })();

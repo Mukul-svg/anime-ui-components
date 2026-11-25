@@ -54,7 +54,7 @@ export function ThemeStudioSection({
 
   return (
     <section id="themes" className="scroll-mt-20 border-t border-[#dcdaf0] bg-[#fafaff]">
-      <div className="mx-auto max-w-[1200px] px-6 py-16">
+      <div className="mx-auto max-w-[1280px] px-6 py-14 lg:px-8">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-xs font-semibold text-[#595488]">

@@ -303,6 +303,36 @@ export function ControlCard({ item, onInspect }: ControlCardProps) {
         el.removeEventListener('action', onAction);
         el.removeEventListener('change', onChange);
       });
+    } else if (item.key === 'action-button') {
+      const onClick = () => setEventLog('click: Focus action fired — シュッ');
+      el.addEventListener('click', onClick);
+      cleanups.push(() => el.removeEventListener('click', onClick));
+    } else if (item.key === 'icon-button') {
+      const onClick = () => setEventLog('click: danger shatter fired — シュッ');
+      el.addEventListener('click', onClick);
+      cleanups.push(() => el.removeEventListener('click', onClick));
+    } else if (item.key === 'textarea') {
+      const onInput = (e: Event) => {
+        const d = (e as CustomEvent<{ value: string }>).detail;
+        const len = d?.value?.length ?? 0;
+        setEventLog(len > 0 ? `input: ${len} chars` : 'input: (empty)');
+      };
+      el.addEventListener('input', onInput);
+      cleanups.push(() => el.removeEventListener('input', onInput));
+    } else if (item.key === 'nav') {
+      const onChange = (e: Event) => {
+        const d = (e as CustomEvent<{ label: string }>).detail;
+        setEventLog(`change: ${d?.label ?? ''}`);
+      };
+      el.addEventListener('change', onChange);
+      cleanups.push(() => el.removeEventListener('change', onChange));
+    } else if (item.key === 'alert') {
+      const onDismiss = (e: Event) => {
+        const d = (e as CustomEvent<{ tone: string }>).detail;
+        setEventLog(`dismiss: ${d?.tone ?? 'info'} alert closed`);
+      };
+      el.addEventListener('dismiss', onDismiss);
+      cleanups.push(() => el.removeEventListener('dismiss', onDismiss));
     }
 
     return () => {

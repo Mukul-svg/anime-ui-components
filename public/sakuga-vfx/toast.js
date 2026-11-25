@@ -11,12 +11,12 @@ const { Spring, rnd, at, esc, lines, puff, shards, ticks, sfx, wob, dotted } = f
 class SakugaToast extends fx.Base {
   static css = `
     :host { width: 236px; height: 56px; }
-    .toast { position: absolute; left: 0; bottom: 0; display: flex; align-items: center; gap: 10px; width: 236px; padding: 12px 14px; border: var(--sk-bw) solid var(--sk-ink); border-radius: var(--sk-r); background: var(--sk-card); box-shadow: var(--sk-sh); font-weight: 700; font-size: 15px; white-space: nowrap; visibility: hidden; will-change: transform; }
+    .toast { position: absolute; left: 0; bottom: 0; display: flex; align-items: center; gap: 10px; width: 244px; padding: 11px 14px; border: var(--sk-bw) solid var(--sk-ink); border-radius: var(--sk-r); background: var(--sk-card); box-shadow: var(--sk-sh); font-weight: 700; font-size: 14px; white-space: nowrap; visibility: hidden; will-change: transform; }
     .toast.on { visibility: visible; }
     .ic { display: grid; place-items: center; flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--sk-pri); border: 2.4px solid var(--sk-ink); }
     .ic svg { width: 15px; height: 15px; fill: none; stroke: var(--sk-on-pri); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
     .msg { overflow: hidden; text-overflow: ellipsis; }
-    .x { margin-left: auto; flex: none; width: 26px; height: 26px; padding: 0; border: 0; border-radius: 50%; background: none; font-weight: 900; font-size: 15px; cursor: pointer; }`;
+    .x { margin-left: auto; flex: none; width: 26px; height: 26px; padding: 0; border: 0; border-radius: 50%; background: none; font-weight: 700; font-size: 15px; cursor: pointer; }`;
   get open() { return this.state > 0 && this.state < 3; }
   render() { return `<div class="toast" part="toast"><span class="ic" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M3.5 10.5l4.5 4.5 8.5-10"/></svg></span><span class="msg" role="status"></span><button class="x" type="button" part="close" aria-label="Dismiss">✕</button></div>`; }
   setup() {
@@ -273,7 +273,7 @@ function squashy(el, { low = 0.82, k = 520, d = 15, wide = 0.55 } = {}) {
   return { s, pop, tilt, step(dt) { const y = s.step(dt), p = pop.step(dt), r = tilt.step(dt), still = Math.abs(y - 1) < 0.001 && Math.abs(s.v) < 0.01 && Math.abs(p - 1) < 0.001 && Math.abs(r) < 0.02;
     el.style.transform = still ? '' : `rotate(${r}deg) scale(${(1 + (1 - y) * wide) * p}, ${y * p})`; } };
 }
-const BASE_CSS = `:host{display:inline-block;position:relative;isolation:isolate;vertical-align:middle;color:var(--sk-ink);font:500 15px/1.4 -apple-system,BlinkMacSystemFont,"Inter","Segoe UI",system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+const BASE_CSS = `:host{display:inline-block;position:relative;isolation:isolate;vertical-align:middle;color:var(--sk-ink);font:500 15px/1.4 var(--sk-font,"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif);-webkit-tap-highlight-color:transparent}
 :host([hidden]){display:none}*{box-sizing:border-box}button,input{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
 :focus-visible{outline:2.5px solid var(--sk-acc);outline-offset:3px}.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 canvas.back{position:absolute;left:-160px;top:-160px;width:calc(100% + 320px);height:calc(100% + 320px);pointer-events:none;z-index:-1}`;

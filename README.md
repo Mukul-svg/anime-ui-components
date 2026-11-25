@@ -1,23 +1,22 @@
-# Anime VFX
+# Koma Desk · Powered by Anime VFX
 
-An interactive showcase, canvas VFX lab, and expanded **30-control** Web Components collection for anime-physics UI controls — ordinary paper-crisp interface primitives at rest that squash on damped springs, overshoot, and throw cel-shaded smoke puffs, impact bursts, crystal shards, splashes, and traced manga sound effects onto a single shared canvas layer.
+A real, local-first **Daily Task Planner, Focus Sprint Timer, and Standup Exporter** (**Koma Desk**) powered by all **35 Anime VFX Web Components** — plus the complete interactive 35-control Component Showcase & Canvas VFX Lab accessible from the top navigation.
 
 > **Built on [Sakuga VFX](https://github.com/finktheartist/sakuga-vfx) by Justin Finkelman (MIT License).**
-> Anime VFX bundles the 12 original upstream Sakuga VFX controls verbatim and extends the shared `window.SakugaFX` physics and canvas engine with 18 additional Studio Pack Web Components plus an interactive slow-motion inspector, direct canvas VFX lab, composite form playground, and live `--sk-*` theme studio.
+> Anime VFX bundles the 12 original upstream Sakuga VFX controls verbatim and extends the shared `window.SakugaFX` physics and canvas engine with 23 additional Studio Pack Web Components. Every control in Koma Desk mutates real persisted state (`localStorage`) with zero backend dependencies, making it 100% static and GitHub Pages ready.
 
 ---
 
 ## Features
 
-- **30 Live Anime-Physics Web Components** — 12 original Sakuga VFX controls + 18 Anime VFX Studio Pack extensions (`29` unique custom elements), all zero-dependency and `prefers-reduced-motion` aware.
-- **Live Keyframe Stage** — Inspect springs and canvas frames in real time (`1×`), slow motion (`0.35×`, `0.15×`), pause, or step forward frame-by-frame (`+1 Frame`) via `window.SakugaFX.advance()`.
-- **Direct Canvas VFX Lab** — Trigger all 11 cel-shaded canvas primitives (`burst`, `puff`, `shards`, `splash`, `slash`, `ring`, `donut`, `lines`, `ticks`, `wob`, `kira`), 4 multi-effect combos, and 6 traced manga SFX (`ドン!`, `ズザッ`, `カチッ`, `ポン`, `ゴゴゴゴ`, `シュッ`) in Solid Ink, Hollow, or Screentone styles.
-- **Live Composite Form Playground** — 10 form-associated controls wired together via `ElementInternals` with validation, storm-cloud progress bar, checkmark landing, and skid toast notifications.
-- **Live `--sk-*` Theme Studio** — Switch between 5 cel palettes (`Classic Sakuga`, `Shonen Crimson`, `Cel Cobalt`, `Studio Genga`, `Manga Ink`) or fine-tune individual CSS tokens and canvas ink live with one-click CSS export.
+- **Tasks Workspace (`Tasks`)** — Create, search, filter (`All` / `Active` / `Done` + tag filters), sort (`Priority` / `Newest` / `Estimate`), boost kudos, edit sprint estimates, inspect notes, complete tasks with live daily progress & combo streaks, and switch live `--sk-*` color palettes.
+- **Focus Sprint Studio (`Focus`)** — Real countdown ring timer (`10s` demo, `5m`, `25m`, `45m`, or custom slider minutes) with Web Audio API harmonic completion chime, optional auto-complete on finish, distraction-dimming Deep Focus Mode, star quality ratings, quick-action radial dial, and logged focus session history.
+- **Standup Export & Scratchpad (`Summary`)** — Auto-generated Markdown standup reports with one-click copy, real `.md` and `.json` file downloads, a 4-digit PIN-locked private scratchpad (`2026`), chronological activity log, and press-and-hold purge protection for completed tasks.
+- **35-Control Anime VFX Library (`Components`)** — Interactive slow-motion Keyframe Stage, full 35-control Gallery, Direct Canvas VFX Lab, Live Composite Form Playground, and Live `--sk-*` Theme Studio.
 
 ---
 
-## Component Catalog (30 Controls)
+## Component Catalog (35 Controls)
 
 ### Original Sakuga VFX Controls (12)
 
@@ -38,7 +37,7 @@ Authored by Justin Finkelman in [`finktheartist/sakuga-vfx`](https://github.com/
 | Toast | `<sakuga-toast>` | `toast.js` | Speed-smear slide-in, skid dust landing (`ズザッ`), spring shrink exit |
 | Tooltip | `<sakuga-tooltip>` | `tooltip.js` | Speech-bubble spring pop with twin puffs and crisp `カチッ` lettering |
 
-### Anime VFX Studio Pack Extensions (18)
+### Anime VFX Studio Pack Extensions (23)
 
 Built on the shared `window.SakugaFX` core engine and bundled in `public/sakuga-vfx/extras.js`:
 
@@ -62,6 +61,11 @@ Built on the shared `window.SakugaFX` core engine and bundled in `public/sakuga-
 | Cel Swatch Picker | `<sakuga-swatches>` | Selection | Ink-rimmed cel paint dots with splash and color-matched kira (`ポン`) |
 | Countdown Ring | `<sakuga-timer>` | Feedback | Circular SVG ring with per-second ticks and `00s` shockwave finisher (`ドン!`) |
 | Split Action Button | `<sakuga-split-button>` | Actions | Primary impact burst (`ドン!`) paired with a spring-unfolded action menu |
+| Compact Action Button | `<sakuga-action-button>` | Actions | Compact cel-shaded icon+label trigger with squash bounce, speed lines & kira (`シュッ`) |
+| Icon Action Button | `<sakuga-icon-button>` | Actions | Square cel-shaded icon button with danger shard shatter or crisp ticks (`カチッ`) |
+| Multiline Textarea | `<sakuga-textarea>` | Inputs | Cel-shaded multiline text box with focus spring pop & keystroke dust puffs |
+| Ink Underline Nav | `<sakuga-nav>` | Selection | Single-line typographic nav links with velocity-stretched spring cel underline (`カチッ`) |
+| Impact Alert Banner | `<sakuga-alert>` | Feedback | Cel-shaded notice/validation banner with entry spring pop & shard dismiss (`シュッ`) |
 
 ---
 
@@ -83,6 +87,15 @@ npm run build
 npm run lint
 npx tsx --test src/lib/sakugaStudio.test.ts
 ```
+
+### Deploy to GitHub Pages
+
+Anime VFX is a 100% static client-side app with relative asset paths (`base: './'`) and a ready-to-run workflow in `.github/workflows/deploy-pages.yml`:
+
+1. Push this repository to GitHub (default branch `main`).
+2. In your repository, go to **Settings → Pages**.
+3. Under **Build and deployment → Source**, choose **GitHub Actions**.
+4. Push to `main` (or trigger the **Deploy Anime VFX to GitHub Pages** workflow manually in the **Actions** tab) to publish automatically.
 
 ---
 

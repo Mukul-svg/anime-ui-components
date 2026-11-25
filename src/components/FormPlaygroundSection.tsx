@@ -295,7 +295,7 @@ export function FormPlaygroundSection() {
 
   return (
     <section id="form-playground" className="scroll-mt-20 border-t border-[#dcdaf0] bg-white">
-      <div className="mx-auto max-w-[1200px] px-6 py-16">
+      <div className="mx-auto max-w-[1280px] px-6 py-14 lg:px-8">
         <div className="max-w-[65ch]">
           <p className="text-xs font-semibold text-[#595488]">
             03. Live Composite Form Playground
@@ -376,7 +376,7 @@ export function FormPlaygroundSection() {
 
               <div className="flex flex-wrap items-center justify-between gap-4 border-t border-[#eceaf7] pt-6">
                 <div ref={actionsMountRef} />
-                <p className="font-mono text-xs text-[#595488]">
+                <p className="text-xs font-medium text-[#595488]">
                   {rendering ? 'Rendering shot...' : 'Ready to queue'}
                 </p>
               </div>
@@ -396,7 +396,7 @@ export function FormPlaygroundSection() {
                 <h3 className="font-display text-base font-bold text-[#1d1a4a]">
                   Rendered Shots Queue
                 </h3>
-                <span className="font-mono text-xs text-[#595488] tabular-nums">
+                <span className="text-xs font-medium text-[#595488] tabular-nums">
                   {jobs.length} {jobs.length === 1 ? 'shot' : 'shots'}
                 </span>
               </div>

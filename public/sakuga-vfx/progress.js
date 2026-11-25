@@ -15,13 +15,17 @@ class SakugaProgress extends fx.Base {
   static observedAttributes = ['value', 'label'];
   static css = `
     :host { display: block; width: var(--sk-progress-width, 280px); max-width: 100%; }
-    .prog { position: relative; padding-top: 70px; }
+    .prog { position: relative; padding-top: var(--sk-progress-pad-top, 70px); }
+    :host([compact]) .prog { display: flex; align-items: center; gap: 14px; padding-top: 0; }
     :host([demo]) .prog { cursor: pointer; }
     .bar { position: relative; height: 38px; border: 4px solid var(--sk-ink); border-radius: 19px; background: var(--sk-card); overflow: hidden; }
+    :host([compact]) .bar { flex: 1; height: 22px; border-width: 2.6px; border-radius: 11px; }
     .bar i { position: relative; display: block; height: 100%; width: calc(var(--v, 0) * 100%); background: var(--sk-fill); }
     .bar i::before, .bar i::after { content: ""; position: absolute; top: 5px; height: 11px; width: 9px; background: #fff; border-radius: 2px; transform: skewX(-28deg); left: 22px; opacity: .92; }
+    :host([compact]) .bar i::before, :host([compact]) .bar i::after { top: 3px; height: 7px; width: 7px; }
     .bar i::after { left: 37px; width: 6px; }
-    .pct { display: table; margin: 64px auto 0; padding: 3px 13px 4px; border: 2.5px solid var(--sk-ink); background: var(--sk-card); box-shadow: 5px 5px 0 var(--sk-fill); transform: skewX(-12deg); font: italic 900 21px/1.1 "Marker Felt", "Chalkboard SE", "Comic Sans MS", -apple-system, "Segoe UI", sans-serif; letter-spacing: -.01em; white-space: nowrap; will-change: transform; }`;
+    .pct { display: table; margin: var(--sk-progress-pct-gap, 64px) auto 0; padding: 4px 13px 4px; border: 2.5px solid var(--sk-ink); background: var(--sk-card); box-shadow: 5px 5px 0 var(--sk-fill); transform: skewX(-10deg); font: 800 18px/1.1 var(--sk-font-display, var(--sk-font, "Plus Jakarta Sans", system-ui, sans-serif)); font-variant-numeric: tabular-nums; letter-spacing: -.01em; white-space: nowrap; will-change: transform; }
+    :host([compact]) .pct { margin: 0; padding: 4px 10px; border-width: 2.2px; box-shadow: 3px 3px 0 var(--sk-fill); font-size: 13.5px; }`;
   get value() { return this.goal; }
   get done() { return !!this.doneAt; }
   attributeChangedCallback(name, _, v) { if (!this.box) return; if (name === 'value') this.set(v === null ? 0 : +v); else this.box.setAttribute('aria-label', v || 'Loading'); }
@@ -325,7 +329,7 @@ function squashy(el, { low = 0.82, k = 520, d = 15, wide = 0.55 } = {}) {
   return { s, pop, tilt, step(dt) { const y = s.step(dt), p = pop.step(dt), r = tilt.step(dt), still = Math.abs(y - 1) < 0.001 && Math.abs(s.v) < 0.01 && Math.abs(p - 1) < 0.001 && Math.abs(r) < 0.02;
     el.style.transform = still ? '' : `rotate(${r}deg) scale(${(1 + (1 - y) * wide) * p}, ${y * p})`; } };
 }
-const BASE_CSS = `:host{display:inline-block;position:relative;isolation:isolate;vertical-align:middle;color:var(--sk-ink);font:500 15px/1.4 -apple-system,BlinkMacSystemFont,"Inter","Segoe UI",system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+const BASE_CSS = `:host{display:inline-block;position:relative;isolation:isolate;vertical-align:middle;color:var(--sk-ink);font:500 15px/1.4 var(--sk-font,"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif);-webkit-tap-highlight-color:transparent}
 :host([hidden]){display:none}*{box-sizing:border-box}button,input{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
 :focus-visible{outline:2.5px solid var(--sk-acc);outline-offset:3px}.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 canvas.back{position:absolute;left:-160px;top:-160px;width:calc(100% + 320px);height:calc(100% + 320px);pointer-events:none;z-index:-1}`;

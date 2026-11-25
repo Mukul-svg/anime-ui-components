@@ -174,7 +174,7 @@ export function VfxLabSection({ activeTheme }: VfxLabSectionProps) {
 
   return (
     <section id="vfx-lab" className="scroll-mt-20 border-t border-[#dcdaf0] bg-[#fafaff]">
-      <div className="mx-auto max-w-[1200px] px-6 py-16">
+      <div className="mx-auto max-w-[1280px] px-6 py-14 lg:px-8">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-xs font-semibold text-[#595488]">02. Direct Canvas VFX Lab</p>
@@ -187,7 +187,7 @@ export function VfxLabSection({ activeTheme }: VfxLabSectionProps) {
               individual primitives and traced manga sound effects.
             </p>
           </div>
-          <p className="font-mono text-xs text-[#595488] tabular-nums">
+          <p className="text-xs font-medium text-[#595488] tabular-nums">
             Effects triggered: {fireCount}
           </p>
         </div>
@@ -251,7 +251,7 @@ export function VfxLabSection({ activeTheme }: VfxLabSectionProps) {
               <p
                 aria-live="polite"
                 data-testid="vfx-lab-status"
-                className="font-mono text-xs text-[#595488] tabular-nums"
+                className="text-xs font-medium text-[#595488] tabular-nums"
               >
                 {lastFired}
               </p>

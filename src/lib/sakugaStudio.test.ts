@@ -16,12 +16,12 @@ import {
   validateRenderJobForm,
 } from './sakugaStudio';
 
-test('catalog contains all thirty Sakuga VFX controls (12 upstream + 18 studio)', () => {
-  assert.equal(SAKUGA_CATALOG.length, 30);
+test('catalog contains all thirty-five Anime VFX controls (12 upstream + 23 studio)', () => {
+  assert.equal(SAKUGA_CATALOG.length, 35);
   const tags = new Set(SAKUGA_CATALOG.map((item) => item.tag));
-  assert.equal(tags.size, 29);
+  assert.equal(tags.size, 34);
   assert.equal(SAKUGA_CATALOG.filter((item) => item.source === 'upstream').length, 12);
-  assert.equal(SAKUGA_CATALOG.filter((item) => item.source === 'studio').length, 18);
+  assert.equal(SAKUGA_CATALOG.filter((item) => item.source === 'studio').length, 23);
   for (const tag of [
     'sakuga-button',
     'sakuga-like',
@@ -42,6 +42,11 @@ test('catalog contains all thirty Sakuga VFX controls (12 upstream + 18 studio)'
     'sakuga-swatches',
     'sakuga-timer',
     'sakuga-split-button',
+    'sakuga-action-button',
+    'sakuga-icon-button',
+    'sakuga-textarea',
+    'sakuga-nav',
+    'sakuga-alert',
   ]) {
     assert.ok(tags.has(tag), `Expected tag ${tag}`);
   }
@@ -49,11 +54,11 @@ test('catalog contains all thirty Sakuga VFX controls (12 upstream + 18 studio)'
 
 test('filterCatalogItems filters by category, studio pack, and text query accurately', () => {
   const selectionOnly = filterCatalogItems(SAKUGA_CATALOG, 'selection');
-  assert.equal(selectionOnly.length, 11);
+  assert.equal(selectionOnly.length, 12);
   assert.ok(selectionOnly.every((item) => item.category === 'selection'));
 
   const studioOnly = filterCatalogItems(SAKUGA_CATALOG, 'all', '', true);
-  assert.equal(studioOnly.length, 18);
+  assert.equal(studioOnly.length, 23);
   assert.ok(studioOnly.every((item) => item.source === 'studio'));
 
   const sfxMatch = filterCatalogItems(SAKUGA_CATALOG, 'all', 'ズザッ');

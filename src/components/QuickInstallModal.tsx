@@ -88,7 +88,7 @@ export function QuickInstallModal({ open, onClose }: QuickInstallModalProps) {
           <p className="mt-1 text-xs text-[#595488]">
             Installs Justin Finkelman&apos;s standalone core controls in{' '}
             <code className="font-mono">public/sakuga-vfx/</code>. Then include{' '}
-            <code className="font-mono">/sakuga-vfx/extras.js</code> to load all 18 Anime VFX
+            <code className="font-mono">/sakuga-vfx/extras.js</code> to load all 23 Anime VFX
             Studio Pack extensions on the same <code className="font-mono">window.SakugaFX</code>{' '}
             canvas loop.
           </p>
