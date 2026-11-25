@@ -149,10 +149,19 @@ export default function App() {
         <div className="mx-auto flex max-w-[1200px] flex-col gap-4 px-6 py-10 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="font-display text-base font-extrabold italic text-[#1d1a4a]">
-              Sakuga VFX
+              Anime VFX
             </p>
             <p className="mt-1 text-xs text-[#595488]">
-              Open-source anime-physics UI components by Justin Finkelman · MIT License · Respects{' '}
+              Built on{' '}
+              <a
+                href={SAKUGA_GITHUB_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="font-semibold text-[#1d1a4a] underline decoration-[#dcdaf0] underline-offset-4 hover:decoration-[#ff5fa8]"
+              >
+                Sakuga VFX
+              </a>{' '}
+              by Justin Finkelman (MIT License) · Extended with 18 Anime VFX controls · Respects{' '}
               <code className="font-mono">prefers-reduced-motion</code>
             </p>
           </div>
@@ -163,7 +172,7 @@ export default function App() {
               rel="noreferrer"
               className="underline decoration-[#dcdaf0] underline-offset-4 hover:decoration-[#ff5fa8]"
             >
-              GitHub Repository
+              Sakuga VFX (Upstream)
             </a>
             <button
               type="button"

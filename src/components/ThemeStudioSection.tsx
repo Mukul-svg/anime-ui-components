@@ -64,9 +64,10 @@ export function ThemeStudioSection({
               Override every <code className="font-mono text-2xl">--sk-*</code> variable live.
             </h2>
             <p className="mt-2 max-w-[62ch] text-sm leading-relaxed text-[#595488]">
-              Sakuga styles sit inside <code className="font-mono text-xs text-[#1d1a4a]">:where(:root)</code>{' '}
-              with zero specificity. Switching presets below updates both the CSS control tokens
-              and the canvas cel-shading palette across the entire page.
+              Anime VFX and Sakuga core styles sit inside{' '}
+              <code className="font-mono text-xs text-[#1d1a4a]">:where(:root)</code> with zero
+              specificity. Switching presets below updates both the CSS control tokens and the
+              canvas cel-shading palette across the entire page.
             </p>
           </div>
 

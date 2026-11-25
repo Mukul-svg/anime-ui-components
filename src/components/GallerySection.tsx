@@ -34,12 +34,13 @@ export function GallerySection({ onInspectControl }: GallerySectionProps) {
             01. Interactive Component Gallery
           </p>
           <h2 className="mt-2 font-display text-3xl font-bold tracking-tight text-[#1d1a4a]">
-            All thirty Sakuga controls, live.
+            All thirty Anime VFX controls, live.
           </h2>
-          <p className="mt-2 max-w-[62ch] text-sm leading-relaxed text-[#595488]">
-            Includes all twelve original Sakuga VFX controls plus eighteen custom Studio extensions
-            built on the shared <code className="font-mono text-xs text-[#1d1a4a]">window.SakugaFX</code>{' '}
-            engine.
+          <p className="mt-2 max-w-[64ch] text-sm leading-relaxed text-[#595488]">
+            Bundles the twelve original{' '}
+            <span className="font-semibold text-[#1d1a4a]">Sakuga VFX</span> controls by Justin
+            Finkelman alongside eighteen Anime VFX Studio Pack extensions built on the shared{' '}
+            <code className="font-mono text-xs text-[#1d1a4a]">window.SakugaFX</code> engine.
           </p>
         </div>
 
@@ -120,7 +121,7 @@ export function GallerySection({ onInspectControl }: GallerySectionProps) {
         <div className="mt-8 rounded-2xl border border-[#dcdaf0] bg-[#fafaff] p-12 text-center">
           <p className="font-display text-lg font-bold text-[#1d1a4a]">No matching controls</p>
           <p className="mt-1 text-sm text-[#595488]">
-            Clear your filter or search query to return to all thirty Sakuga VFX controls.
+            Clear your filter or search query to return to all thirty Anime VFX controls.
           </p>
           <button
             type="button"

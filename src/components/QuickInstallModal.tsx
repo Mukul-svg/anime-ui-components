@@ -44,9 +44,11 @@ export function QuickInstallModal({ open, onClose }: QuickInstallModalProps) {
     >
       <div className="flex items-start justify-between gap-4 border-b border-[#eceaf7] px-6 py-5">
         <div>
-          <p className="text-xs font-semibold text-[#595488]">Zero-Dependency Web Components</p>
+          <p className="text-xs font-semibold text-[#595488]">
+            Anime VFX · Built on Sakuga VFX (MIT)
+          </p>
           <h2 id="quick-install-title" className="mt-1 font-display text-2xl font-bold text-[#1d1a4a]">
-            Install Sakuga VFX
+            Install Anime VFX &amp; Sakuga Core
           </h2>
         </div>
         <button
@@ -63,7 +65,7 @@ export function QuickInstallModal({ open, onClose }: QuickInstallModalProps) {
         <div>
           <div className="flex items-center justify-between gap-2">
             <h3 className="font-display text-sm font-bold text-[#1d1a4a]">
-              Add Components via Registry
+              Add Core Components via Upstream Sakuga VFX Registry
             </h3>
             <button
               type="button"
@@ -84,8 +86,11 @@ export function QuickInstallModal({ open, onClose }: QuickInstallModalProps) {
             </button>
           </div>
           <p className="mt-1 text-xs text-[#595488]">
-            Places each standalone component in <code className="font-mono">public/sakuga-vfx/</code>.
-            Every component shares one <code className="font-mono">window.SakugaFX</code> canvas loop.
+            Installs Justin Finkelman&apos;s standalone core controls in{' '}
+            <code className="font-mono">public/sakuga-vfx/</code>. Then include{' '}
+            <code className="font-mono">/sakuga-vfx/extras.js</code> to load all 18 Anime VFX
+            Studio Pack extensions on the same <code className="font-mono">window.SakugaFX</code>{' '}
+            canvas loop.
           </p>
           <pre className="mt-2.5 overflow-x-auto rounded-xl bg-[#f7f6fd] p-4 font-mono text-xs leading-relaxed text-[#1d1a4a]">
             <code>{CLI_SNIPPET}</code>

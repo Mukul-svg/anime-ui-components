@@ -96,11 +96,12 @@ export function ControlDocsModal({ item, onClose }: ControlDocsModalProps) {
           </div>
         ) : (
           <div>
-            <h3 className="font-display text-sm font-bold text-[#1d1a4a]">Studio Extension</h3>
+            <h3 className="font-display text-sm font-bold text-[#1d1a4a]">Anime VFX Extension</h3>
             <p className="mt-1 text-xs leading-relaxed text-[#595488]">
-              Authored with the Sakuga VFX core (<code className="font-mono">window.SakugaFX</code>)
-              and bundled in <code className="font-mono">/sakuga-vfx/extras.js</code>. Load after
-              any core Sakuga component script.
+              Part of the Anime VFX Studio Pack, built on the upstream Sakuga VFX core engine (
+              <code className="font-mono">window.SakugaFX</code>) and bundled in{' '}
+              <code className="font-mono">/sakuga-vfx/extras.js</code>. Load after any core Sakuga
+              VFX component script.
             </p>
           </div>
         )}

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowDown, Pause, Play, StepForward } from 'lucide-react';
-import { PLAYBACK_MODES } from '../lib/sakugaStudio';
+import { PLAYBACK_MODES, SAKUGA_GITHUB_URL } from '../lib/sakugaStudio';
 import type {
   SakugaButtonElement,
   SakugaRatingElement,
@@ -95,7 +95,16 @@ export function HeroSpotlight({
           <div className="flex flex-col justify-between lg:col-span-6">
             <div>
               <p className="text-xs font-semibold tracking-wide text-[#595488]">
-                Open-source Web Components · Zero Dependencies · MIT Licensed
+                Anime VFX · Built on{' '}
+                <a
+                  href={SAKUGA_GITHUB_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[#1d1a4a] underline decoration-[#b8b3ff] underline-offset-3 hover:decoration-[#ff5fa8]"
+                >
+                  Sakuga VFX
+                </a>{' '}
+                (MIT) · Zero Dependencies
               </p>
               <h1 className="mt-4 font-display text-[clamp(2.35rem,4vw,3.55rem)] font-extrabold italic leading-[1.06] tracking-tight text-[#1d1a4a]">
                 Ordinary UI controls that hit like key animation.

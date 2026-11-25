@@ -301,7 +301,7 @@ export function FormPlaygroundSection() {
             03. Live Composite Form Playground
           </p>
           <h2 className="mt-2 font-display text-3xl font-bold tracking-tight text-[#1d1a4a]">
-            Ten Sakuga controls wired in one working workflow.
+            Ten Anime VFX controls wired in one working workflow.
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-[#595488]">
             Value controls participate in forms via ElementInternals. Configure a keyframe shot

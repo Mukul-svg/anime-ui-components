@@ -10,7 +10,7 @@ export function Header({ onOpenInstall }: HeaderProps) {
           href="#top"
           className="font-display text-xl font-extrabold italic tracking-tight text-[#1d1a4a] whitespace-nowrap shrink-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#ff5fa8]"
         >
-          Sakuga VFX
+          Anime VFX
         </a>
 
         <nav
