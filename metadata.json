@@ -1,0 +1,8 @@
+{
+  "name": "Sakuga VFX Studio",
+  "description": "Interactive showcase, slow-motion keyframe inspector, canvas VFX lab, live form playground, and theme customizer for Sakuga VFX anime-physics web components.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    overflow-x: clip;
+    background-color: #ffffff;
+    color: #1d1a4a;
+    font-family: var(--font-sans);
+  }
+
+  body {
+    overflow-x: clip;
+    margin: 0;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    text-wrap: balance;
+  }
+
+  dialog::backdrop {
+    background: rgba(29, 26, 74, 0.36);
+    backdrop-filter: blur(4px);
+  }
+}
+
+.animation-sheet-grid {
+  background-color: #fafaff;
+  background-image:
+    radial-gradient(circle, #cfcceb 1px, transparent 1px),
+    linear-gradient(to right, rgba(220, 218, 240, 0.35) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(220, 218, 240, 0.35) 1px, transparent 1px);
+  background-size: 20px 20px, 100px 100px, 100px 100px;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
